@@ -1,42 +1,46 @@
+//excellent folder organization derived from Shorty's express model app (Matt Short)
+// include packages profusely
 var express         = require('express'),
     server          = express(),
     ejs             = require('ejs'),
     expressLayouts  = require('express-ejs-layouts'),
     bodyParser      = require('body-parser'),
     methodOverride  = require('method-override'),
-    morgan          = require('morgan');
+    morgan          = require('morgan'),
+    session 		= require('express-session');
+    url            = 'mongodb://localhost:27017/test',
+    // router 			= require('router'),
+// var menuItem    	= require('./models/menu_item.js'),
+// 	order			= require('./models/order.js');
 
-// set views folder and change engine to ejs
+// use outside controllers
+var counterController = require('./controllers/counter_controller.js');
+server.use('/counter', counterController);
+var kitchenController = require('./controllers/kitchen_controller.js');
+server.use('/kitchen', kitchenController);
+
+// render views from views folder via ejs, connect to mongoose, log profusely
 server.set('views', './views');
 server.set('view engine', 'ejs');
+mongoose.set('debug', true);
+mongoose.connect(url);
 
-// let static files be served from the /public folder
+// serve static files from public
 server.use(express.static('./public'));
 
-// use server logger for requests, but require short descriptions
+// log ALL THE THINGS!!!
 server.use(morgan('dev'));
 
-// let forms submit into req.body with nice nested properties
+// parse strings into pretty things
 server.use(bodyParser.urlencoded({ extended: true }));
 
-// let forms submit to PUT, PATCH, and DELETE with query string ?_method=XXX
+// Override methods profusely
 server.use(methodOverride("_method"));
 
-// use a layout.ejs file in /views, so as to have one main application wide
-// layout, each view then gets passed in to wherever <%- body %> is
+// All views are rendered into layout.ejs with individual views in <%- body %>
 server.use(expressLayouts);
 
-// import model based controllers
-var catController = require('./controllers/cats.js');
-server.use('/cats', catController);
-/* server.use('/cats', catController) tells us to use *
- * the router for any route that starts wit `/cats`   */
-
 // write server specific controllers
-server.use('/', function (req, res) {
-  res.render('welcome');
-});
-
 server.listen(3000, function () {
-  console.log("I'm a callback!");
+  console.log("Restaurant is open at 3000");
 });
